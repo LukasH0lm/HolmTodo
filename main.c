@@ -1,37 +1,120 @@
+/**
+ * @file main.c
+ * @brief HolmTodo - A simple command-line todo application
+ * @author LukasH0lm
+ * @date 2025
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#define MAX_SIZE 256
 
+/**
+ * @struct TodoItem
+ * @brief Represents a single todo item
+ */
 struct TodoItem
 {
     char description[32];
     bool isDone;
 };
 
-struct TodoItem TodoList[10];
+/* ========================================
+ *           DATA TRANSFER METHODS
+ * ======================================== */
 
-void add_todo(struct TodoItem list[], int capacity, int *current_count, char *description)
+/**
+ * @brief Saves a single todo to file
+ * @param description The todo description
+ * @param isDone Completion status
+ */
+void save_todo(char *description, bool isDone)
+{
+    FILE *file = fopen("TodoList.txt", "a");
+    if (file != NULL)
+    {
+        fprintf(file, "%s,%d\n", description, isDone ? 1 : 0);
+        fclose(file);
+    }
+}
+
+/**
+ * @brief Loads todos from file into the array
+ * @param list Array to populate with todos
+ * @param max_capacity Maximum number of todos the array can hold
+ * @return Number of todos actually loaded
+ */
+int load_todos(struct TodoItem list[], int max_capacity)
+{
+    FILE *file = fopen("TodoList.txt", "r");
+
+    // If file doesn't exist, no todos to load
+    if (file == NULL)
+    {
+        return 0;
+    }
+
+    int count = 0;
+    char description[32];
+    int isDone;
+
+    // Read each line: "description,0" or "description,1"
+    while (fscanf(file, "%31[^,],%d\n", description, &isDone) == 2)
+    {
+        if (count >= max_capacity)
+        {
+            printf("error: could not load saved todos, too many lines");
+            break;
+        }
+
+        strcpy(list[count].description, description);
+        list[count].isDone = (isDone != 0);
+        count++;
+    }
+
+    fclose(file);
+    return count;
+}
+
+/* ========================================
+ *              COMMAND METHODS
+ * ======================================== */
+
+/**
+ * @brief Adds a new todo item to the list and saves it to file
+ * @param list Array of TodoItem structs to add the item to
+ * @param capacity Maximum capacity of the list
+ * @param current_count Pointer to current number of items in list
+ * @param description Text description of the todo item
+ */
+void add_todo(struct TodoItem list[], int *current_count, char *description)
 {
 
-    if (*current_count >= capacity)
+    if (*current_count >= MAX_SIZE)
     {
         printf("Can't add todo, list is full\n");
         return;
     }
 
+        // Add to memory array
     strcpy(list[*current_count].description, description);
     list[*current_count].isDone = false;
-
     (*current_count)++;
+
+    // Save to file
+    save_todo(description, false);
+
 }
 
 int main(int argc, char *argv[])
 {
 
-#define MAX_SIZE 256
     struct TodoItem TodoList[MAX_SIZE];
     int count = 0;
+    count = load_todos(TodoList, MAX_SIZE);
+
 
     if (argc < 2)
     {
@@ -39,7 +122,7 @@ int main(int argc, char *argv[])
         printf("HolmTodo - Command Line Todo App\n");
         printf("Usage: %s <command> [arguments]\n", argv[0]);
         printf("Commands:\n");
-        printf("  add <description>  - Add a new todo\n");
+        printf("  add <description> - Add a new todo\n");
         printf("  list              - List all todos\n");
         printf("  complete <id>     - Mark todo as complete\n");
         printf("  delete <id>       - Delete a todo\n");
@@ -53,22 +136,20 @@ int main(int argc, char *argv[])
             printf("Error: No description provided for add command\n");
             return 1;
         }
-        add_todo(TodoList, MAX_SIZE, &count, argv[2]);
+        add_todo(TodoList, &count, argv[2]);
         printf("Added todo: %s\n", argv[2]);
     }
     else if (strcmp(argv[1], "list") == 0)
     {
-        // TODO: implement list later
-        printf("List command not implemented yet\n");
         if (count == 0)
         {
-            printf("list is empty");
+            printf("list is empty\n");
         }
         else
         {
             for (int i = 0; i < count; i++)
             {
-                printf("%i. %s [%s]\n", i+1, TodoList[i].description, TodoList[i].isDone ? "X" : " ");
+                printf("%i. %s [%s]\n", i + 1, TodoList[i].description, TodoList[i].isDone ? "X" : " ");
             }
         }
     }
