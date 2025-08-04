@@ -3,11 +3,11 @@
 A simple command-line todo application written in C.
 
 ## Features to implement:
-- [ ] Add new todo items
-- [ ] List all todos
+- [X] Add new todo items
+- [X] List all todos
 - [ ] Mark todos as complete
 - [ ] Delete todos
-- [ ] Save/load from file
+- [X] Save/load from file
 
 ## Build Instructions:
 ```bash
@@ -18,6 +18,6 @@ gcc -o todo main.c
 ```bash
 ./todo add "Buy groceries"
 ./todo list
-./todo complete 1
-./todo delete 1
+./todo complete "Buy groceries"
+./todo delete "Buy groceries"
 ```
