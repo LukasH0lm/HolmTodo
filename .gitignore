@@ -9,8 +9,14 @@ todo
 *.swo
 *~
 
+# Generated documentation
+html/
+latex/
+man/
+
 # OS generated files
 .DS_Store
 Thumbs.db
 
+# TodoList
 TodoList.txt
