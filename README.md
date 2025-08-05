@@ -6,7 +6,7 @@ A simple command-line todo application written in C.
 - [X] Add new todo items
 - [X] List all todos
 - [ ] Mark todos as complete
-- [ ] Delete todos
+- [X] Delete todos
 - [X] Save/load from file
 
 ## Build Instructions:
