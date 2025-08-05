@@ -16,8 +16,8 @@ gcc -o todo main.c
 
 ## Usage:
 ```bash
-./todo add "Buy groceries"
 ./todo list
+./todo add "Buy groceries"
 ./todo complete "Buy groceries"
 ./todo delete "Buy groceries"
 ```

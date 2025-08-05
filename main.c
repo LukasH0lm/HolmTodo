@@ -40,6 +40,51 @@ void save_todo(char *description, bool isDone)
     }
 }
 
+void save_all_todos(struct TodoItem list[], int *count)
+{
+    FILE *file = fopen("TodoList.txt", "w"); // "w" = overwrite
+    if (file != NULL) {
+        for (int i = 0; i < *count; i++)
+        {
+            printf("%s%s%s", "saved " , list[i].description, " to file");
+            fprintf(file, "%s,%d\n", list[i].description, list[i].isDone ? 1 : 0);
+        }
+        fclose(file);  
+    }
+}
+
+void delete_todo(struct TodoItem list[], int *current_count, char *description)
+{
+
+    bool foundLineToBeDeleted = false;
+    int lineToBeDeleted = 0;
+    for (int i = 0; i < *current_count; i++)
+    {
+
+        if (!strcmp(list[i].description, description))
+        {
+            foundLineToBeDeleted = true;
+            lineToBeDeleted = i;
+            break;
+        }
+    }
+    if (foundLineToBeDeleted)
+    {
+        for (int i = lineToBeDeleted + 1; i < *current_count; i++)
+        {
+
+            list[i - 1] = list[i];
+        }
+        (*current_count)--;
+        save_all_todos(list, current_count);
+        printf("%s%s%s", "todo with description ", description, " deleted\n");
+    }
+    else
+    {
+        printf("%s%s%s", "todo with description ", description, " could not be found\n");
+    }
+}
+
 /**
  * @brief Loads todos from file into the array
  * @param list Array to populate with todos
@@ -98,14 +143,13 @@ void add_todo(struct TodoItem list[], int *current_count, char *description)
         return;
     }
 
-        // Add to memory array
+    // Add to memory array
     strcpy(list[*current_count].description, description);
     list[*current_count].isDone = false;
     (*current_count)++;
 
     // Save to file
     save_todo(description, false);
-
 }
 
 int main(int argc, char *argv[])
@@ -115,17 +159,17 @@ int main(int argc, char *argv[])
     int count = 0;
     count = load_todos(TodoList, MAX_SIZE);
 
-
     if (argc < 2)
     {
         // TODO: Your implementation goes here
         printf("HolmTodo - Command Line Todo App\n");
         printf("Usage: %s <command> [arguments]\n", argv[0]);
         printf("Commands:\n");
-        printf("  add <description> - Add a new todo\n");
-        printf("  list              - List all todos\n");
-        printf("  complete <id>     - Mark todo as complete\n");
-        printf("  delete <id>       - Delete a todo\n");
+        printf("  list                      - List all todos\n");
+
+        printf("  add <description>         - Add a new todo\n");
+        printf("  complete <description>    - Mark todo as complete\n");
+        printf("  delete <description>      - Delete a todo\n");
         return 0;
     }
 
@@ -139,6 +183,17 @@ int main(int argc, char *argv[])
         add_todo(TodoList, &count, argv[2]);
         printf("Added todo: %s\n", argv[2]);
     }
+
+    else if (strcmp(argv[1], "delete") == 0)
+    {
+        if (argc < 3)
+        {
+            printf("Error: No description provided for delete command\n");
+            return 1;
+        }
+        delete_todo(TodoList, &count, argv[2]);
+    }
+
     else if (strcmp(argv[1], "list") == 0)
     {
         if (count == 0)
